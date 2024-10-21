@@ -4,8 +4,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+
+# Env
+.env
+
 # Optional npm cache directory
 .npm
 
-# file
-not_git.txt
+# File
+note_git.txt
+
