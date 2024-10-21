@@ -26,8 +26,17 @@ const MovieSearch = () => {
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const response = await searchMovies(query, page)
-      setMovies((prevMovies) => [...prevMovies, ...response.data.results])
+      console.log(page);
+      const response = await searchMovies(query, page);
+      
+      setMovies((prevMovies) => {
+        const combinedMovies = [...prevMovies, ...response.data.results];
+        const uniqueMovies = combinedMovies.filter(
+          (movie, index, self) =>
+            index === self.findIndex((m) => m.id === movie.id)
+        );
+        return uniqueMovies;
+      });
     } catch (error) {
       console.error('Error fetching movies:', error);
     } finally {
@@ -38,7 +47,7 @@ const MovieSearch = () => {
   
   const handleScroll = () => {
     if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
-      if (!loading) { 
+      if (!loading) {
         setPage((prevPage) => prevPage + 1); // Incrémente la page
       }
     }
@@ -60,8 +69,8 @@ const MovieSearch = () => {
 
   const handleSearch = async (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
-      setMovies([])
       setPage(1)
+      setMovies([])
       fetchMovies()
     }
   };
