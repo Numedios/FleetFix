@@ -38,7 +38,9 @@ const MovieSearch = () => {
   
   const handleScroll = () => {
     if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
-      setPage((prevPage) => prevPage + 1); // Incrémente la page lorsque l'utilisateur défile vers le bas
+      if (!loading) { 
+        setPage((prevPage) => prevPage + 1); // Incrémente la page
+      }
     }
   };
 
@@ -46,7 +48,7 @@ const MovieSearch = () => {
     if (query) {
       fetchMovies();
     }
-  }, [query, page]); 
+  }, [page]); 
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
