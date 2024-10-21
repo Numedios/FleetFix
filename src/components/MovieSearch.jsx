@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { searchMovies } from '../services/tmdbApi';
 import styled from 'styled-components'; 
 
@@ -11,29 +11,59 @@ const Poster = styled.img`
 const MovieList = styled.li`
   display: flex;
   align-items: center;
-  border : 1px solid red;
+  border : 1px solid white;
   width: 300px;
   height: 100px;
 `;
 
 
 const MovieSearch = () => {
-  const [query, setQuery] = useState('');
-  const [movies, setMovies] = useState([]);
+  const [query, setQuery] = useState('')
+  const [movies, setMovies] = useState([])
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
 
-  const handleSearch = async (e) => {
-    if (e.key === 'Enter' || e.type === 'click')
-    {
-      try {
-        const response = await searchMovies(query);
-        setMovies(response.data.results);
-        console.log(response)
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-      }
+  const fetchMovies = async () => {
+    setLoading(true);
+    try {
+      const response = await searchMovies(query, page)
+      setMovies((prevMovies) => [...prevMovies, ...response.data.results])
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  
+  const handleScroll = () => {
+    if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
+      setPage((prevPage) => prevPage + 1); // Incrémente la page lorsque l'utilisateur défile vers le bas
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      fetchMovies();
+    }
+  }, [query, page]); 
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    console.log("scrol")
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const handleSearch = async (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      setMovies([])
+      setPage(1)
+      fetchMovies()
+    }
+  };
+  
   return (
     <div>
       <input
