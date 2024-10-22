@@ -1,19 +1,96 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { searchMovies } from '../services/tmdbApi';
 import styled from 'styled-components'; 
 
-const Poster = styled.img`
-  width: 50px;
-  height: 80px;
-  margin: 5px;
+
+
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
 `;
 
-const MovieList = styled.li`
+const MovieContainer = styled.div`
+  width: 40%;
+  height: 95vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #f0f0f0;
+  /* @media (min-width: 800px) {
+    width: 20%; 
+  } */
+`;
+
+const MovieList = styled.ul`
   display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+`;
+
+const MovieItem = styled.li`
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  border : 1px solid white;
-  width: 300px;
-  height: 100px;
+  justify-content: center;
+  border: 1px solid white;
+  margin-bottom: 8px; 
+  width: 100%;
+  height: 120px; 
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  text-align: center;
+  padding: 8px;
+`;
+
+const Poster = styled.img`
+  width: 60px;
+  height: auto;
+  max-height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+`;
+
+const Title = styled.p`
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 8px;
+  color: #333;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+`;
+const SearchContainer = styled.div`
+  display: flex;
+  height: 5vh;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #0e1217; 
+  width: 40%;
+  /* @media (min-width: 800px) {
+    width: 20%;
+  } */
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  padding: 8px; 
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+`;
+
+const SearchButton = styled.button`
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: auto;
 `;
 
 
@@ -22,6 +99,8 @@ const MovieSearch = () => {
   const [movies, setMovies] = useState([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
+  const movieContainerRef = useRef(null); 
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchMovies = async () => {
     setLoading(true);
@@ -44,28 +123,41 @@ const MovieSearch = () => {
     }
   };
 
-  
   const handleScroll = () => {
-    if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
-      if (!loading) {
-        setPage((prevPage) => prevPage + 1); // Incrémente la page
+    const container = movieContainerRef.current;
+    if (!container) return;
+
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+      if (!isFetching) {
+        setIsFetching(true)
+        setPage((prevPage) => prevPage + 1)
       }
     }
   };
 
+
+  useEffect(() => {
+    if (!isFetching) return
+    setIsFetching(false)
+  }, [movies]);
+
+  useEffect(() => {
+    const movieContainer = movieContainerRef.current
+
+    if (movieContainer) {
+      movieContainer.addEventListener('scroll', handleScroll)
+      return () => {
+        movieContainer.removeEventListener('scroll', handleScroll)
+      };
+    }
+  }, []); 
+
   useEffect(() => {
     if (query) {
-      fetchMovies();
+      fetchMovies()
     }
   }, [page]); 
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    console.log("scrol")
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   const handleSearch = async (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
@@ -77,21 +169,26 @@ const MovieSearch = () => {
   
   return (
     <div>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyUp={handleSearch}
-        placeholder="Search for a movie..."
-      />
-      <button  onClick={handleSearch}>Search</button>
-      <ul>
+      <SearchContainer>
+        <SearchInput
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyUp={handleSearch}
+          placeholder="Search for a movie..."
+        />
+        <SearchButton onClick={handleSearch}>Search</SearchButton>
+      </SearchContainer>
+      <MovieContainer  ref={movieContainerRef}>
+      <MovieList>
         {movies.map((movie) => (
-          <MovieList key={movie.id}>
-            <Poster src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}/>
-            <p>{movie.title}</p></MovieList>
+          <MovieItem key={movie.id}>
+            <Poster src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} alt={movie.title} />
+            <Title>{movie.title}</Title>
+          </MovieItem>
         ))}
-      </ul>
+      </MovieList>
+    </MovieContainer>
     </div>
   );
 };
