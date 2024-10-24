@@ -2,22 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { searchMovies } from '../services/tmdbApi';
 import styled from 'styled-components'; 
 
-
-
-
 const Container = styled.div`
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: column;
 `;
 
 const MovieContainer = styled.div`
-  width: 40%;
+  width: 50%;
   height: 95vh;
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #f0f0f0;
   @media (min-width: 800px) {
-    width: 30%; 
+    width: 70%; 
   }
 `;
 
@@ -42,6 +39,10 @@ const MovieItem = styled.li`
   border-radius: 8px;
   text-align: center;
   padding: 8px;
+  cursor: pointer;
+  &:hover {
+    background-color: #d0d0d0;
+  }
 `;
 
 const Poster = styled.img`
@@ -62,6 +63,7 @@ const Title = styled.p`
   white-space: nowrap;
   width: 100%;
 `;
+
 const SearchContainer = styled.div`
   display: flex;
   height: 5vh;
@@ -69,9 +71,9 @@ const SearchContainer = styled.div`
   justify-content: center;
   gap: 10px;
   background-color: #0e1217; 
-  width: 50%;
+  width: 50%; /* Changer à 100% pour prendre toute la largeur */
   @media (min-width: 800px) {
-    width: 30%;
+    width: 70%;
   }
 `;
 
@@ -93,23 +95,20 @@ const SearchButton = styled.button`
   width: auto;
 `;
 
-
-const MovieSearch = () => {
-  const [query, setQuery] = useState('')
-  const [movies, setMovies] = useState([])
-  const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(false)
+const MovieSearch = ({ onMovieSelect }) => {
+  const [query, setQuery] = useState('');
+  const [movies, setMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const movieContainerRef = useRef(null); 
   const [isFetching, setIsFetching] = useState(false);
 
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      console.log(page);
       const response = await searchMovies(query, page);
-      
       setMovies((prevMovies) => {
-        const combinedMovies = [...prevMovies, ...response.data.results];
+        const combinedMovies = [...prevMovies, ...response.data.results]
         const uniqueMovies = combinedMovies.filter(
           (movie, index, self) =>
             index === self.findIndex((m) => m.id === movie.id)
@@ -135,14 +134,14 @@ const MovieSearch = () => {
     }
   };
 
-
   useEffect(() => {
     if (!isFetching) return
     setIsFetching(false)
   }, [movies]);
 
+
   useEffect(() => {
-    const movieContainer = movieContainerRef.current
+    const movieContainer = movieContainerRef.current;
 
     if (movieContainer) {
       movieContainer.addEventListener('scroll', handleScroll)
@@ -156,8 +155,7 @@ const MovieSearch = () => {
     if (query) {
       fetchMovies()
     }
-  }, [page]); 
-
+  }, [page])
 
   const handleSearch = async (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
@@ -166,9 +164,13 @@ const MovieSearch = () => {
       fetchMovies()
     }
   };
-  
+
+  const handleMovieClick = (movie) => {
+    onMovieSelect(movie)
+  };
+
   return (
-    <div>
+    <Container>
       <SearchContainer>
         <SearchInput
           type="text"
@@ -179,17 +181,17 @@ const MovieSearch = () => {
         />
         <SearchButton onClick={handleSearch}>Search</SearchButton>
       </SearchContainer>
-      <MovieContainer  ref={movieContainerRef}>
-      <MovieList>
-        {movies.map((movie) => (
-          <MovieItem key={movie.id}>
-            <Poster src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} alt={movie.title} />
-            <Title>{movie.title}</Title>
-          </MovieItem>
-        ))}
-      </MovieList>
-    </MovieContainer>
-    </div>
+      <MovieContainer ref={movieContainerRef}>
+        <MovieList>
+          {movies.map((movie) => (
+            <MovieItem key={movie.id} onClick={() => handleMovieClick(movie)}>
+              <Poster src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} alt={movie.title} />
+              <Title>{movie.title}</Title>
+            </MovieItem>
+          ))}
+        </MovieList>
+      </MovieContainer>
+    </Container>
   );
 };
 
