@@ -16,9 +16,9 @@ const MovieContainer = styled.div`
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #f0f0f0;
-  /* @media (min-width: 800px) {
-    width: 20%; 
-  } */
+  @media (min-width: 800px) {
+    width: 30%; 
+  }
 `;
 
 const MovieList = styled.ul`
@@ -69,10 +69,10 @@ const SearchContainer = styled.div`
   justify-content: center;
   gap: 10px;
   background-color: #0e1217; 
-  width: 40%;
-  /* @media (min-width: 800px) {
-    width: 20%;
-  } */
+  width: 50%;
+  @media (min-width: 800px) {
+    width: 30%;
+  }
 `;
 
 const SearchInput = styled.input`
