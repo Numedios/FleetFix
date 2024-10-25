@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MovieSearch from './components/MovieSearch';
 import MovieDetails from './components/MovieDetails';
 import styled from 'styled-components';
+import logo from './img/logo.jpg';
 
 const AppContainer = styled.div`
   display: flex;
@@ -10,30 +11,40 @@ const AppContainer = styled.div`
 `;
 
 const MovieContainer = styled.div`
-  width: 40%; // MovieSearch prend 40%
-  height: 100%; // Prendre toute la hauteur
-  overflow-y: auto; // Permettre le défilement
+  width: 40%;
+  height: 100%;
+  overflow-y: auto;
 `;
 
 const DetailsContainer = styled.div`
-  width: 55%; // MovieDetails prend 55%
+  width: 60%;
+  position: relative;
+`;
 
+const Logo = styled.img`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 150px;
+  height: auto;
+  z-index: 2;
 `;
 
 const App = () => {
-  const [selectedMovie, setSelectedMovie] = useState(null); // État pour le film sélectionné
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   const handleMovieSelect = (movie) => {
-    setSelectedMovie(movie); // Met à jour l'état avec le film sélectionné
+    setSelectedMovie(movie)
   };
 
   return (
     <AppContainer>
       <MovieContainer>
-        <MovieSearch onMovieSelect={handleMovieSelect} /> {/* Passer la fonction de sélection */}
+        <MovieSearch onMovieSelect={handleMovieSelect} />
       </MovieContainer>
       <DetailsContainer>
-        <MovieDetails movie={selectedMovie} /> {/* Passer le film sélectionné */}
+        <Logo src={logo} alt="Logo" />
+        <MovieDetails movie={selectedMovie} />
       </DetailsContainer>
     </AppContainer>
   );
